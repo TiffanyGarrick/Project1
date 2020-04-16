@@ -5,108 +5,93 @@ Werkzeug Documentation:  http://werkzeug.pocoo.org/documentation/
 This file creates your application.
 """
 
-from app import app, db, login_manager
+import os
+import psycopg2
 from flask import render_template, request, redirect, url_for, flash
-from flask_login import login_user, logout_user, current_user, login_required
-from app.forms import LoginForm
-from app.models import UserProfile
-from werkzeug.security import check_password_hash
-
+from app.forms import UserProfile
+#import datetime
+from models import User
+from app import app, db
+from werkzeug.utils import secure_filename
 ###
 # Routing for your application.
 ###
-
-
+app.secret_key = 'A0Zr98j/3yX R~XHH!jmN]LWX/,?RT'
 @app.route('/')
 def home():
     """Render website's home page."""
     return render_template('home.html')
 
-
 @app.route('/about')
 def about():
     """Render the website's about page."""
-    return render_template('about.html', name="Mary Jane")
+    #return render_template('about.html', name="Tiffany Garrick")
+    return render_template('about.html')
 
+def connect_db():
+ return psycopg2.connect(host="localhost",database="project", user="postgres", password="@Poogiebear123") 
 
-@app.route('/secure-page')
-@login_required
-def secure_page():
-    """Render a secure page on our website that only logged in users can access."""
-    return render_template('secure_page.html')
+@app.route('/profile', methods=['GET','POST'])
+def profile():
+    """Render the website's adding profile page."""
+    User = UserProfile()
+    if request.method == 'POST':
+        if User.validate_on_submit():
+            db = connect_db()
+            cur = db.cursor()
+            firstname = User.firstname.data
+            lastname = User.lastname.data
+            gender = User.gender.data
+            email = User.email.data
+            location = User.location.data
+            biography = User.biography.data
+            profilepic = User.profilepic.data
+            date=User.date.data
+            
+            filename = secure_filename(profilepic.filename)
+            profilepic.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            
+            cur.execute('insert into user_profiles (firstname, lastname, gender, email, location, biography, date)values (%s, %s, %s, %s, %s, %s %s)', (request.form['firstname'],request.form['lastname'],request.form['gender'],request.form['email'],request.form['location'],request.form['biography'], request.form['date']))
+            db.commit()
+            flash('The profile was succesfully added', 'success')
+            return redirect(url_for('profiles'), filename=filename, form=User)
+        flash_errors(User)
+    
+    return render_template('profile.html')
 
+@app.route('/profiles')
+def profiles():
+    """Render the website's profiles list page."""
+    db = connect_db()
+    cur = db.cursor()
+    cur.execute('select firstname, lastname, gender, email, location, biography, date from user_profiles order by id desc')
+    users=cur.fetchall()
+    return render_template('profiles.html', users=users)
 
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if current_user.is_authenticated:
-        # if user is already logged in, just redirect them to our secure page
-        # or some other page like a dashboard
-        return redirect(url_for('secure_page'))
-
-    # Here we use a class of some kind to represent and validate our
-    # client-side form data. For example, WTForms is a library that will
-    # handle this for us, and we use a custom LoginForm to validate.
-    form = LoginForm()
-    # Login and validate the user.
-    if request.method == 'POST' and form.validate_on_submit():
-        # Query our database to see if the username and password entered
-        # match a user that is in the database.
-        username = form.username.data
-        password = form.password.data
-
-        # user = UserProfile.query.filter_by(username=username, password=password)\
-        # .first()
-        # or
-        user = UserProfile.query.filter_by(username=username).first()
-
-        if user is not None and check_password_hash(user.password, password):
-            remember_me = False
-
-            if 'remember_me' in request.form:
-                remember_me = True
-
-            # If the user is not blank, meaning if a user was actually found,
-            # then login the user and create the user session.
-            # user should be an instance of your `User` class
-            login_user(user, remember=remember_me)
-
-            flash('Logged in successfully.', 'success')
-
-            next_page = request.args.get('next')
-            return redirect(next_page or url_for('home'))
-        else:
-            flash('Username or Password is incorrect.', 'danger')
-
-    flash_errors(form)
-    return render_template('login.html', form=form)
-
-
-@app.route("/logout")
-@login_required
-def logout():
-    # Logout the user and end the session
-    logout_user()
-    flash('You have been logged out.', 'danger')
-    return redirect(url_for('home'))
-
-
-# This callback is used to reload the user object from the user ID stored in the session.
-# It should take the unicode ID of a user, and return the corresponding user object.
-@login_manager.user_loader
-def load_user(id):
-    return UserProfile.query.get(int(id))
-
+@app.route('/profile/<userid>')
+def profile_specific(userid):
+#Render the website's specific profile page based on user id
+    form=UserProfile()
+    if(User.query.get(int(userid))):
+        date=User.query.get(form.date.data)
+        firstname=User.query.get(form.first_name.data)
+        lastname=User.query.get(form.last_name.data)
+        #gender=User.query.get(form.gender.data)
+        email=User.query.get(form.email.data)
+        location=User.query.get(form.location.data)
+        biography=User.query.get(form.biography.data)
+        return render_template("user_specific.html", date=date,firstname=firstname,lastname=lastname,
+            email=email,location=location,biography=biography)
+    else:
+        #return error page
+        return render_template ('404.html')
 
 # Flash errors from the form if validation fails with Flask-WTF
 # http://flask.pocoo.org/snippets/12/
 def flash_errors(form):
     for field, errors in form.errors.items():
         for error in errors:
-            flash(u"Error in the %s field - %s" % (
-                getattr(form, field).label.text,
-                error
-            ), 'danger')
-
+            flash(u"Error in the %s field - %s" % (getattr(form, field).label.text,error), 'danger')
 
 ###
 # The functions below should be applicable to all Flask apps.

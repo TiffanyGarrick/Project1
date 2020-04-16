@@ -1,8 +1,31 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
-  <span class="navbar-brand mb-0 h1">Demo User App</span>
+  <span class="navbar-brand mb-0 h1">Project User App</span>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
   </button>
+  
+  <div class="navigation-bar">
+	  <ul class="navigation-lists">
+  		  <li class="project1">Project 1</li>
+  		  <li id="hiding">
+  		    <a href="{{ url_for('home') }}">hidden</a>
+  		  </li>
+  		  <li >
+  		    <a class="active" href="{{ url_for('home') }}">Home</a>
+  		  </li>
+  		  <li>
+  		    <a href="{{ url_for('about') }}">About</a>
+  		  </li>
+  		  <li>
+  		    <a href="{{ url_for('profile') }}">Profile</a>
+  		  </li>
+  	  	<li>
+  	  	  <a href="{{ url_for('profiles') }}">Profiles</a>
+  	  	</li>
+	  </ul>
+  </div>
+  
+  <!-- ORIGINAL
   <div class="collapse navbar-collapse" id="navbarNav">
     <ul class="navbar-nav mr-auto">
       <li class="nav-item active">
@@ -11,6 +34,16 @@
       <li class="nav-item">
         <a class="nav-link" href="{{ url_for('about') }}">About</a>
       </li>
+      
+      //added profile and profiles
+      <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('profile') }}">Profile</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('profiles') }}">Profiles</a>
+      </li>
+      
+      //is secure page necessary??
       <li class="nav-item">
         <a class="nav-link" href="{{ url_for('secure_page') }}">Secure Page</a>
       </li>
@@ -27,5 +60,5 @@
           </li>
       {% endif %}
     </ul>
-  </div>
+  </div>-->
 </nav>

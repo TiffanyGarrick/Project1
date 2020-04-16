@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block main %}
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+<script src='https://kit.fontawesome.com/a076d05399.js'></script>
+<script src='https://kit.fontawesome.com/a076d05399.js'></script>
+
+<div class="specificuser-body">
+    <img class="specificuser-picture" src="/static/images/picture.jpg" alt="Profile Picture">
+    <div class="picture-right">
+        <h2 id="fname_lname">{{firstname}} {{lastname}}</h2>
+        <i class="glyphicon glyphicon-envelope"> {{email}}</i> <!--<p id="picture-right">{{email}}</p>-->
+        <i class='fas fa-map-marker-alt'> {{location}}</i> <!--<p id="picture-right">{{location}}</p>-->
+        <i class='far fa-calendar'> Joined on {{date}}</i><!--<p id="picture-right"> Joined on {{date}} </p>-->
+    </div>
+    <!--BIO INFORMATION-->
+    <br>
+    <p>About Me</p><br>
+    <p id="picture-under">{{biography}}</p>
+    <br>
+    <!--BUTTONS-->
+    <table class="noborder">
+        <tr>
+            <td><button class="send-button">Send Message</button></td>
+            <td id="hi">hi</td>
+            <td><button class="button">Follow</button></td>
+        </tr>
+    </table>
+    <!--<button class="button-message">Send Message</button>
+    <button class="button-follow">Follow</button>-->
+</div>
+{% endblock %}
